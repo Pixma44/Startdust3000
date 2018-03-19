@@ -12,13 +12,26 @@
 using namespace std;
 
 int main() {
-
 	SerialHandler serial;
-	cout << "Hello world" <<endl;
-	clock_t click = clock();
-	serial.writeData("Hello pti rpi");
-	cout << serial.readData() << endl;
-	cout << (clock()-click) <<endl;
+    string data ="";
+	while(1) {
+
+		serial.delay(1000);
+		if (serial.data_availlable()!=0){
+			data=serial.readData();
+			cout << data << endl;
+			if(data == "PUSHED") {
+				cout << "PUSHED received" << endl;
+				serial.writeData("ON");
+
+			}
+			else if (data=="NOTPUSHED") {
+				cout << "NOTPUSHED received" << endl;
+				serial.writeData("OFF");
+			}
+		}
+		else {
+			cout << "no data" <<endl;
+		}
+	}
 }
-
-

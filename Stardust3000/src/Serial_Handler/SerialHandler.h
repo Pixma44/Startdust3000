@@ -17,7 +17,7 @@
 #include <fcntl.h>			//Used for UART
 #include <termios.h>		//Used for UART
 #include <time.h>  			//used for mydelay
-
+#include <sys/ioctl.h>
 
 class SerialHandler {
 public:
@@ -26,6 +26,7 @@ public:
 	void delay(int millisecond);
 	std::string readData();
 	int writeData(std::string p_data);
+	int data_availlable();
 private:
 
 	int uart0_filestream;

@@ -47,7 +47,7 @@ int SerialHandler::setup() {
 		//											immediately with a failure status if the output can't be written immediately.
 		//
 		//	O_NOCTTY - When set and path identifies a terminal device, open() shall not cause the terminal device to become the controlling terminal for the process.
-		uart0_filestream = open("/dev/ttyS0", O_RDWR | O_NOCTTY );		//Open in non blocking read/write mode
+		uart0_filestream = open("/dev/ttyAMA0", O_RDWR | O_NOCTTY );		//Open in non blocking read/write mode
 		if (uart0_filestream == -1)
 		{
 			//ERROR - CAN'T OPEN SERIAL PORT
@@ -77,18 +77,21 @@ int SerialHandler::config(){
 	//	PARODD - Odd parity (else even)
 	struct termios options;
 	tcgetattr(uart0_filestream, &options);
-	options.c_cflag = B1152000 | CS8 | CLOCAL | CREAD;		//<Set baud rate
-	options.c_iflag = IGNPAR;
-	options.c_oflag = 0;
-	options.c_lflag = 0;
-	tcflush(uart0_filestream, TCIFLUSH);
+	cfsetspeed(&options, B9600);
+	cfmakeraw(&options);
+	options.c_cflag &= ~CSTOPB;
+	options.c_cflag |= CLOCAL;
+	options.c_cflag |= CREAD;
+	options.c_cc[VTIME]=0;
+	options.c_cc[VMIN]=1;
 	return tcsetattr(uart0_filestream, TCSANOW, &options);
 }
 
 int SerialHandler::writeData(string p_data){
 	if (uart0_filestream != -1)
 	{
-		int count = write(uart0_filestream, p_data.c_str(), p_data.size()+1);		//Filestream, bytes to write, number of bytes to write
+		int count = write(uart0_filestream, p_data.c_str(), p_data.size()+1);	//Filestream, bytes to write, number of bytes to write
+		tcdrain(uart0_filestream);
 		if (count < 0)
 		{
 			printf("UART TX error\n");
@@ -106,30 +109,60 @@ string SerialHandler::readData(){
 		if (uart0_filestream != -1)
 		{
 			// Read up to 255 characters from the port if they are there
-			unsigned char rx_buffer[256];
-			int rx_length = read(uart0_filestream,(void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
+			//tcflush(uart0_filestream, TCIFLUSH);
+			unsigned char rx_buffer[255]="";
+			std::string data="";
+			int rx_length=0;
+			rx_length = read(uart0_filestream,(void*)rx_buffer, 255);		//Filestream, buffer to store in, number of bytes to read (max)
 			if (rx_length < 0)
 			{
 				//An error occured (will occur if there are no bytes)
-				printf("No data received (rx_lenght <0 \n");
-			}
-			else if (rx_length == 0)
-			{
-				//No data waiting
+				printf("Error during reception (rx_lenght =%d ) \n", rx_length);
 			}
 			else
 			{
-				//Bytes received
-				std::string data ((char*)rx_buffer);
-				return data;
+				return data=((char*)rx_buffer);
 			}
 		}
-		return "";
+		return "no data";
 }
+//string SerialHandler::readData(){
+//
+//		if (uart0_filestream != -1)
+//		{
+//			// Read up to 255 characters from the port if they are there
+//			//tcflush(uart0_filestream, TCIFLUSH);
+//			unsigned char rx_buffer[255];
+//			std::string data;
+//			int rx_length=0;
+//			do {
+//				rx_length = read(uart0_filestream,(void*)rx_buffer, 9);		//Filestream, buffer to store in, number of bytes to read (max)
+//				if (rx_length < 0)
+//				{
+//					//An error occured (will occur if there are no bytes)
+//					printf("Error during reception (rx_lenght =%d ) \n", rx_length);
+//					break;
+//				}
+//				else
+//				{
+//					//Bytes received
+//					//printf("%s",rx_buffer);
+//					data+= ((char*)rx_buffer);
+//				}
+//			}while (rx_length >0);
+//			return data;
+//		}
+//		return "no data";
+//}
 /**
  * @brief n : keep the CPU running during approximatively the amount of millisecond given as parameter
  * @param : millisecond, as an integer : indicate delay duration
  */
+int SerialHandler::data_availlable() {
+	int bytes=0;
+	ioctl(uart0_filestream, FIONREAD, &bytes);
+	return bytes;
+}
 void SerialHandler::delay(int millisecond)
 {
 	clock_t ticks1, ticks2;
