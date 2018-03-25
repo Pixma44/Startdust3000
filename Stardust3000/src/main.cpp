@@ -8,30 +8,15 @@
 
 #include <iostream>
 #include "Serial_Handler/SerialHandler.h"
+#include "MemMap/Memmap.h"
 
 using namespace std;
 
+
+
 int main() {
 	SerialHandler serial;
-    string data ="";
-	while(1) {
+	cout << (int)addrMap.capteur.couleurs.CC_Cube <<endl;
 
-		serial.delay(1000);
-		if (serial.data_availlable()!=0){
-			data=serial.readData();
-			cout << data << endl;
-			if(data == "PUSHED") {
-				cout << "PUSHED received" << endl;
-				serial.writeData("ON");
 
-			}
-			else if (data=="NOTPUSHED") {
-				cout << "NOTPUSHED received" << endl;
-				serial.writeData("OFF");
-			}
-		}
-		else {
-			cout << "no data" <<endl;
-		}
-	}
 }

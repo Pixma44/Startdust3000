@@ -27,11 +27,18 @@ public:
 	std::string readData();
 	int writeData(std::string p_data);
 	int data_availlable();
+	void serialTest_1();
 private:
 
 	int uart0_filestream;
 	int setup();
 	int config();
+	struct WR_header {
+		uint8_t addrDev[2];
+		uint8_t AddrMem[2];
+		uint8_t Count;
+		unsigned char* Data;
+	};
 
 };
 
