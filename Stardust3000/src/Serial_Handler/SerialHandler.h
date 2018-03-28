@@ -20,25 +20,27 @@
 #include <sys/ioctl.h>
 
 class SerialHandler {
+
 public:
 	SerialHandler();
 	virtual ~SerialHandler();
 	void delay(int millisecond);
-	std::string readData();
-	int writeData(std::string p_data);
+	int readData(uint8_t* buffer, int len);
+	int get();
+	int writeData(const uint8_t *p_data, int len);
 	int data_availlable();
 	void serialTest_1();
-private:
-
-	int uart0_filestream;
-	int setup();
-	int config();
+	void rFlush();
 	struct WR_header {
-		uint8_t addrDev[2];
+		uint8_t AddrDev[2];
 		uint8_t AddrMem[2];
 		uint8_t Count;
-		unsigned char* Data;
 	};
+
+private:
+	int uart0_filestream;
+	int setup();
+	int config(int baud=115200);
 
 };
 
