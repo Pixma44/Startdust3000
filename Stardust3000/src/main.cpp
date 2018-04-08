@@ -10,14 +10,31 @@
 #include "Serial_Handler/SerialHandler.h"
 #include <bits/stdc++.h>
 #include <string>
+#include <pthread.h>
 
 using namespace std;
 
+SerialHandler serial;
+
+void *foo(void *arg) {
+
+	uint8_t buffer[4] = {'0','0','0','0'};
+	while (1){
+		serial.my_poll(buffer);
+		for (int i=0; i<4;i++) {
+			printf("[%d] = [%c] \n", i, buffer[i]);
+		}
+	}
+	pthread_exit(NULL);
+}
 int main() {
-	SerialHandler serial;
+
 	short offset;
 	string message;
+	pthread_t t1;
+	pthread_create(&t1,NULL,foo,NULL);
 	do {
+
 		cout << "your data : " << endl;
 		cin >> message;
 		cin.ignore();
@@ -40,4 +57,5 @@ int main() {
 		else printf("%d : [%c]\n",i,data_received[i]);
 		}
 	}while(message != "exit");
+	pthread_join(t1,NULL);
 }

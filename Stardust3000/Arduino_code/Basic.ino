@@ -1,4 +1,3 @@
-
 #include <Wire.h>
 #include <SPI.h>
 #include <variant.h>
@@ -10,6 +9,7 @@
 #define READ  0xF1
 #define MAXOFFSET 250
 
+int num,bsend,i;
 uint8_t memmap[250];
 struct WR_header {
   uint8_t AddrDev[2];
@@ -23,10 +23,25 @@ byte data[250];
 void setup() {
 // put your setup code here, to run once:
   pinMode(P_COM4.Pin.P5, OUTPUT);
+  pinMode(P_COM4.Pin.P4, INPUT);
   P_COM3.serial.begin(115200);
 }
 
 void loop() {
+  if(digitalRead(P_COM4.Pin.P4)==HIGH) {
+    num =((num*11/3)+1)%5000;
+    if(bsend==0){
+      P_COM3.serial.print(num);
+      bsend=1;
+    }
+  }
+  else{
+      i++;
+      if (i>10){
+        i=0;
+        bsend=0;
+      }
+  }
   digitalWrite(P_COM4.Pin.P5, HIGH);
   if(P_COM3.serial.available() >=5) {
     P_COM3.serial.readBytes(buff_header,5);

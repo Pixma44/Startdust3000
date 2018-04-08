@@ -18,6 +18,7 @@
 #include <termios.h>		//Used for UART
 #include <time.h>  			//used for mydelay
 #include <sys/ioctl.h>
+#include <poll.h>
 #define HEADERSIZE	5
 #define WRITE	0xF0
 #define READ	0xF1
@@ -32,7 +33,7 @@ public:
 	//Main tools :
 	int get(int offset, int length, uint8_t buffer[]);
 	int set(int offset, int lenght, uint8_t data[]);
-
+	int my_poll(uint8_t *buffer);
 	//tools :
 	int rFlush();
 	int wFlush();
@@ -58,6 +59,7 @@ private:
 	Header headerBuilder(uint8_t IO, short p_offset, int p_length, short p_AddrMem=0x5555);
 	Header headerReader(uint8_t* buffer);
 	void headerPrinter (SerialHandler::Header header);
+
 };
 
 #endif /* SERIALHANDLER_H_ */

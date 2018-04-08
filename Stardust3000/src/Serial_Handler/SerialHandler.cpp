@@ -7,6 +7,7 @@
 
 #include "SerialHandler.h"
 
+
 using namespace std;
 
   /********************/
@@ -119,6 +120,20 @@ int SerialHandler::set(int p_offset, int p_len, uint8_t data[]) {
 		printf("offset or length incorrect \n");
 		return -1;
 	}
+}
+
+int SerialHandler::my_poll(uint8_t *buffer){
+	/*si message recu /
+	 *
+	 */
+	struct pollfd src;
+	src.fd=uart0_filestream;
+	src.events = POLLIN;
+	src.revents=0;
+
+	int check = poll(&src,1,-1);
+	readData(buffer,dataAvailable());
+	return 0;
 }
 //*********
 //tools :
